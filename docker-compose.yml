@@ -1,0 +1,28 @@
+services:
+  aapanel:
+    build: .
+    image: custom-aapanel-latest:ubuntu22
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Asia/Riyadh}
+      SSH_USER: ${SSH_USER:-hosting}
+      SSH_PUBLIC_KEY: ${SSH_PUBLIC_KEY:-}
+      # Prefer SSH_PUBLIC_KEY. Use SSH_PASSWORD only when key auth is not available.
+      # SSH_PASSWORD: ${SSH_PASSWORD}
+      # Set to true only when you intentionally want to refresh panel code from the image seed.
+      FORCE_PANEL_REPAIR: ${FORCE_PANEL_REPAIR:-false}
+    ports:
+      - "2222:22"
+    volumes:
+      - aapanel_www:/www
+      - aapanel_cache:/dev/shm/nginx-cache
+    networks:
+      - dokploy-network
+
+volumes:
+  aapanel_www:
+  aapanel_cache:
+
+networks:
+  dokploy-network:
+    external: true
