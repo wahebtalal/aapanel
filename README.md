@@ -10,6 +10,35 @@ The image downloads the current official aaPanel installer during `docker build`
 - `docker-entrypoint.sh` initializes `/www`, configures SSH/SFTP, starts aaPanel, and starts common aaPanel-managed services.
 - `docker-compose.yml` is ready for Dokploy deployments that build directly from this repository.
 
+
+## GitHub Actions Docker Hub publishing
+
+The workflow in `.github/workflows/docker-hub.yml` builds this image and pushes it to Docker Hub on pushes to `main`/`master`, version tags such as `v1.0.0`, manual runs, and a weekly scheduled rebuild.
+
+Configure these GitHub repository settings before running it:
+
+| Type | Name | Example | Purpose |
+| --- | --- | --- | --- |
+| Secret | `DOCKERHUB_USERNAME` | `your-dockerhub-user` | Docker Hub account or organization used for the image namespace. |
+| Secret | `DOCKERHUB_TOKEN` | Docker Hub access token | Token used by GitHub Actions to push the image. |
+| Variable | `DOCKERHUB_IMAGE` | `aapanel-latest` | Optional image repository name. Defaults to `aapanel-latest`. |
+
+Default-branch builds publish these tags:
+
+- `latest`
+- `ubuntu22`
+- `ubuntu22-<git-sha>`
+
+Version tags like `v1.2.3` also publish semver tags such as `1.2.3` and `1.2`.
+
+After the workflow publishes successfully, Dokploy can use the pushed image instead of building locally:
+
+```yaml
+services:
+  aapanel:
+    image: your-dockerhub-user/aapanel-latest:ubuntu22
+```
+
 ## Dokploy environment variables
 
 ```env
